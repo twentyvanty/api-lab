@@ -23,3 +23,12 @@ def log_in_new_user(api):
 @pytest.fixture
 def auth(api):
  return log_in_new_user(api)
+@pytest.fixture
+def rating(api, auth, pizza_id):
+ """A rating with 3 stars, made before the test and deleted after it."""
+ new = {"pizza_id": pizza_id, "stars": 3}
+ res = api.post("/api/ratings", json=new, headers=auth)
+ assert res.status_code == 201
+ made = res.json()
+ yield made
+ api.delete(f"/api/ratings/{made['id']}", headers=auth)
