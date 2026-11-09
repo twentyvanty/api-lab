@@ -4,12 +4,13 @@ import requests
 SITE = "https://quickpizza.grafana.com"
 class QuickPizza(requests.Session):
  """A session that puts the address of the site in front of each path."""
- def request(self, method, url, *args, **kwargs):
+def request(self, method, url, *args, **kwargs):
   return super().request(method, SITE + url, *args, **kwargs)
-@pytest.fixture(scope="session")
-def api():
- with QuickPizza() as session:
-  yield session
+@pytest.fixture
+def pizza_id(api, auth):
+ res = api.post("/api/pizza", json={}, headers=auth)
+ assert res.status_code == 200
+ return res.json()["pizza"]["id"]
 def log_in_new_user(api):
      """Create a user with a new name, log in, and return its header."""
      name = "lab-" + uuid.uuid4().hex[:12]
